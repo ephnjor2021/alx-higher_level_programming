@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-def weight_average(my_list=[]):
-    if(my_list):
-        return(sum(x*y for x, y in my_list) / sum(y for x, y in my_list))
-    else:
-        return(0)
+def best_score(a_dictionary):
+    if(a_dictionary):
+        return(max(a_dictionary, key=a_dictionary.get))
