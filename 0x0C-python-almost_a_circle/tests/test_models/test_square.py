@@ -1,102 +1,131 @@
 #!/usr/bin/python3
-"""Square class unittests"""
-import io
-import sys
 import unittest
+from models.square import Square
 from models.base import Base
 from models.rectangle import Rectangle
-from models.square import Square
+import sys
+from io import StringIO
+"""tests square"""
 
 
-class TestSquareClass(unittest.TestCase):
+class TestSquare(unittest.TestCase):
 
-    def test_class_membership(self):
-        """Square class unittest"""
-        sq1 = Square(1)
-        self.assertIsInstance(sq1, Base)
-        self.assertIsInstance(sq1, Rectangle)
-        self.assertIsInstance(sq1, Square)
+    def test_docstrings(self):
+        """tests docstrings"""
+        self.assertTrue(len(Rectangle.__doc__) > 0)
+        self.assertTrue(len(Square.__doc__) > 0)
+        for func in dir(Rectangle):
+            self.assertTrue(len(func.__doc__) > 0)
+        for func in dir(Square):
+            self.assertTrue(len(func.__doc__) > 0)
 
-    def test_attributes_with_correct_initialization(self):
-        """Square attribute unittest"""
-        sq2 = Square(5, x=8, y=5, id=25)
-        self.assertEqual(sq2.id, 25)
-        self.assertEqual(sq2.__str__(), '[Square] (25) 8/5 - 5')
-        self.assertEqual(sq2.area(), 25)
+    def test_ids(self):
+        """tests ids"""
+        Base._Base__nb_objects = 0
+        r1 = Square(10)
+        r2 = Square(2)
+        r3 = Square(10, 0, 0, 12)
+        self.assertEqual(r1.id, 1)
+        self.assertEqual(r2.id, 2)
+        self.assertEqual(r3.id, 12)
+        r3.id = "a"
+        self.assertEqual(r3.id, "a")
 
-    def test_attributes_wrong_data_types(self):
-        """Square wrong data types unittest"""
-        with self.assertRaises(TypeError):
-            sq3 = Square('a')
+    def test_attr_errors(self):
+        """tests errors"""
+        Base._Base__nb_objects = 0
+        with self.assertRaises(TypeError, msg="size must be an integer"):
+            r1 = Square("2")
+        with self.assertRaises(ValueError, msg="size must be  > 0"):
+            r1 = Square(-2)
+        with self.assertRaises(TypeError, msg="size must be an integer"):
+            r1 = Square({1: 2})
+        with self.assertRaises(ValueError, msg="size must be > 0"):
+            r2 = Square(10)
+            r2.size = -10
+        with self.assertRaises(TypeError, msg="x must be an integer"):
+            r3 = Square(10, 2)
+            r3.x = {}
+        with self.assertRaises(ValueError, msg="y must be >=0"):
+            r4 = Square(10, 2, -1)
 
-    def test_attributes_with_wrong_int_range(self):
-        """Square wrong int range unittest"""
-        with self.assertRaises(ValueError):
-            sq4 = Square(0)
-        with self.assertRaises(ValueError):
-            sq5 = Square(-1)
+    def test_areas(self):
+        """tests areas"""
+        Base._Base__nb_objects = 0
+        r1 = Square(3)
+        self.assertEqual(r1.area(), 9)
 
-    def test_area_method(self):
-        """Square area method unittest"""
-        sq6 = Square(10)
-        self.assertEqual(sq6.area(), 100)
+        r1 = Square(2)
+        self.assertEqual(r1.area(), 4)
 
-    def test_display_method(self):
-        """Square display method unittest"""
-        output = io.StringIO()
-        sys.stdout = output
-        sq7 = Square(2)
-        sq7.display()
-        sys.stdout = sys.__stdout__
-        self.assertEqual(output.getvalue(), "##\n##\n")
+        r1 = Square(8, 0, 0, 12)
+        self.assertEqual(r1.area(), 64)
 
-    def test_str_method(self):
-        """Square __str__ method unittest"""
-        sq8 = Square(2, id=99)
-        str_s = sq8.__str__()
-        self.assertEqual(str_s, '[Square] (99) 0/0 - 2')
+    def test_display(self):
+        """tests displays"""
+        Base._Base__nb_objects = 0
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+        r1 = Square(2)
+        r1.display()
+        sys.stdout = old_stdout
+        self.assertEqual(mystdout.getvalue(), "##\n##\n")
+        sys.stdout = mystdout = StringIO()
+        r1 = Square(2, 2, 2)
+        r1.display()
+        self.assertEqual(mystdout.getvalue(), "\n\n  ##\n  ##\n")
+        sys.stdout = old_stdout
 
-    def test_display_method_w_coordinates(self):
-        """Square display method unittest"""
-        output = io.StringIO()
-        sys.stdout = output
-        sq9 = Square(2, x=1, y=1)
-        sq9.display()
-        sys.stdout = sys.__stdout__
-        self.assertEqual(output.getvalue(), "\n ##\n ##\n")
+    def test_str(self):
+        """tests strings"""
+        Base._Base__nb_objects = 0
+        r1 = Square(4, 2, 1, 12)
+        self.assertEqual(r1.__str__(), "[Square] (12) 2/1 - 4")
+        r2 = Square(5, 1)
+        self.assertEqual(r2.__str__(), "[Square] (1) 1/0 - 5")
+        r1 = Square(1)
+        self.assertEqual(r1.__str__(), "[Square] (2) 0/0 - 1")
 
-    def test_size_attribute(self):
-        """Square size method unittest"""
-        sq10 = Square(5)
-        self.assertEqual(sq10.size, 5)
-        sq10.size = 9
-        self.assertEqual(sq10.size, 9)
-        with self.assertRaises(TypeError):
-            sq10.size = 'a'
-        with self.assertRaises(ValueError):
-            sq10.size = -10
+    def test_update(self):
+        """tests update"""
+        Base._Base__nb_objects = 0
+        r1 = Square(10, 10, 10, 10)
+        r1_dictionary = r1.to_dictionary()
+        r1.update(89)
+        self.assertEqual(r1.__str__(), "[Square] (89) 10/10 - 10")
+        r1.update(89, 2)
+        self.assertEqual(r1.__str__(), "[Square] (89) 10/10 - 2")
+        r1.update(89, 2, 3)
+        self.assertEqual(r1.__str__(), "[Square] (89) 3/10 - 2")
+        r1.update(x=1, height=2, y=3, width=4)
+        self.assertEqual(r1.__str__(), "[Square] (89) 1/3 - 4")
+        with self.assertRaises(ValueError, msg="x must be >=0"):
+            r1.update(y=1, width=2, x=-3, id=89)
+        r2 = Square(2, 2)
+        r2.update(**r1_dictionary)
+        self.assertEqual(r2.__str__(), "[Square] (10) 10/10 - 10")
 
-    def test_update_method_args_kwargs(self):
-        """Square update method unittest"""
-        sq11 = Square(1)
-        sq11.update(1)
-        self.assertEqual(sq11.__str__(), '[Square] (1) 0/0 - 1')
-        sq11.update(1, 5)
-        self.assertEqual(sq11.__str__(), '[Square] (1) 0/0 - 5')
-        sq11.update(1, 5, 2, 3)
-        self.assertEqual(sq11.__str__(), '[Square] (1) 2/3 - 5')
-        sq11.update(id=99, x=4, y=7, size=8)
-        self.assertEqual(sq11.__str__(), '[Square] (99) 4/7 - 8')
+    def test_dictionary(self):
+        """tests dictionary"""
+        Base._Base__nb_objects = 0
+        r1 = Square(10, 2, 1, 9)
+        r1_dictionary = r1.to_dictionary()
+        self.assertDictEqual(r1_dictionary, {
+            'x': 2, 'y': 1, 'size': 10, 'id': 9})
+        r1 = Square(1)
+        r1_dictionary = r1.to_dictionary()
+        self.assertDictEqual(r1_dictionary, {
+            'x': 0, 'y': 0, 'size': 1, 'id': 1})
 
-    def test_to_dictionary_method(self):
-        """Square to_dictionary method unittest"""
-        sq12 = Square(3)
-        d = sq12.to_dictionary()
-        self.assertIsInstance(d, dict)
-        self.assertEqual(d['id'], 42)
-        self.assertEqual(d['size'], 3)
-        self.assertEqual(d['x'], 0)
-        self.assertEqual(d['y'], 0)
+    def test_SquareCreate(self):
+        """tests create"""
+        Base._Base__nb_objects = 0
+        s1 = Square(10)
+        s1_dictionary = s1.to_dictionary()
+        s2 = Square.create(**s1_dictionary)
+        self.assertFalse(s1 is s2)
+        self.assertFalse(s1 == s2)
+
 
 if __name__ == '__main__':
     unittest.main()

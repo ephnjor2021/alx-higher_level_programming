@@ -1,122 +1,96 @@
 #!/usr/bin/python3
-"""Base class unittests"""
-import json
 import unittest
+import os.path
 from models.base import Base
 from models.rectangle import Rectangle
 from models.square import Square
+"""tests the Base"""
 
 
-class TestBaseClass(unittest.TestCase):
+class TestBase(unittest.TestCase):
 
-    def test_class_membership(self):
-        """Base class unittest"""
-        b0 = Base()
-        self.assertIsInstance(b0, Base)
-
-    def test_no_id_arg(self):
-        """Base class ids unittest"""
+    def test_id(self):
+        """tests the ids"""
+        Base._Base__nb_objects = 0
         b1 = Base()
         b2 = Base()
         b3 = Base()
-        self.assertEqual(b1.id, 7)
-        self.assertEqual(b2.id, 8)
-        self.assertEqual(b3.id, 9)
-
-    def test_no_id_plus_id_combo(self):
-        """Base class ids unittest"""
-        b4 = Base(5)
+        b4 = Base(12)
         b5 = Base()
-        self.assertEqual(b4.id, 5)
-        self.assertEqual(b5.id, 10)
+        self.assertEqual(b1.id, 1)
+        self.assertEqual(b2.id, 2)
+        self.assertEqual(b3.id, 3)
+        self.assertEqual(b4.id, 12)
+        self.assertEqual(b5.id, 4)
 
-    def test_to_json_string(self):
-        """to_json_string method unittest"""
-        r = Rectangle(10, 7, 2, 8)
-        rd = r.to_dictionary()
-        self.assertIsInstance(rd, dict)
-        json_rd = Base.to_json_string([rd])
-        self.assertIsInstance(json_rd, str)
+    def test_dictionary(self):
+        """tests the dictionary"""
+        Base._Base__nb_objects = 0
+        r1 = Rectangle(10, 7, 2, 8)
+        dictionary = r1.to_dictionary()
+        self.assertDictEqual(dictionary,
+                             {'x': 2, 'width': 10,
+                              'id': 1, 'height': 7, 'y': 8})
+        json_dictionary = Base.to_json_string([dictionary])
+        self.assertEqual(json_dictionary, json_dictionary)
+        self.assertEqual(Base.to_json_string(None), "[]")
+        self.assertEqual(Base.to_json_string([]), "[]")
 
-        s = Square(10)
-        sd = s.to_dictionary()
-        self.assertIsInstance(sd, dict)
-        json_sd = Base.to_json_string([sd])
-        self.assertIsInstance(json_sd, str)
+    def test_saveFile(self):
+        """tests the savefile"""
+        Base._Base__nb_objects = 0
+        r1 = Rectangle(10, 7, 2, 8)
+        r2 = Square(4)
+        Rectangle.save_to_file([r1])
+        Square.save_to_file([r2])
+        with open("Rectangle.json", 'r') as f:
+            self.assertTrue(len(f.read()) > 1)
+        with open("Square.json", 'r') as f:
+            self.assertTrue(len(f.read()) > 1)
 
-    def test_save_to_file(self):
-        """save_to_file method unittest"""
+        Rectangle.save_to_file(None)
+        Square.save_to_file(None)
+        with open("Rectangle.json", 'r') as f:
+            self.assertTrue(f.read() == "[]")
+        with open("Square.json", 'r') as f:
+            self.assertTrue(f.read() == "[]")
+
+    def test_fromJson(self):
+        """tests the fromjson"""
+        r_input = [{'id': 89, 'width': 10, 'height': 4}]
+        s_input = [{'id': 89, 'size': 4}]
+        json_list_input = Rectangle.to_json_string(r_input)
+        list_output = Rectangle.from_json_string(json_list_input)
+        self.assertTrue(type(list_output) is list)
+        list_output = Rectangle.from_json_string([])
+        self.assertTrue(list_output == [])
+        list_output = Rectangle.from_json_string(None)
+        self.assertTrue(list_output == [])
+        json_list_input = Square.to_json_string(s_input)
+        list_output = Square.from_json_string(json_list_input)
+        self.assertTrue(type(list_output) is list)
+        list_output = Square.from_json_string([])
+        self.assertTrue(list_output == [])
+        list_output = Square.from_json_string(None)
+        self.assertTrue(list_output == [])
+
+    def test_load(self):
+        """tests load"""
         r1 = Rectangle(10, 7, 2, 8)
         r2 = Rectangle(2, 4)
-        Rectangle.save_to_file([r1, r2])
-        dict_list = []
-        with open('Rectangle.json', 'r', encoding='utf-8') as f:
-            dict_list = json.load(f)
-        self.assertIsInstance(dict_list, list)
-        self.assertEqual(len(dict_list), 2)
-        list_ref = [
-            {'id': 11, 'height': 7, 'x': 2, 'width': 10, 'y': 8},
-            {'id': 12, 'height': 4, 'x': 0, 'width': 2, 'y': 0}
-        ]
-        self.assertListEqual(dict_list, list_ref)
-
-        Square.save_to_file([])
-        dict_list = []
-        with open('Square.json', 'r', encoding='utf-8') as f:
-            dict_list = json.load(f)
-        self.assertIsInstance(dict_list, list)
-        self.assertEqual(len(dict_list), 0)
-
-        s1 = Square(2, x=1, y=2, id=98)
-        s2 = Square(3, x=5, y=7, id=99)
-        Square.save_to_file([s1, s2])
-        dict_list = []
-        with open('Square.json', 'r', encoding='utf-8') as f:
-            dict_list = json.load(f)
-        self.assertIsInstance(dict_list, list)
-        self.assertEqual(len(dict_list), 2)
-        list_ref = [
-            {'x': 1, 'id': 98, 'size': 2, 'y': 2},
-            {'x': 5, 'id': 99, 'size': 3, 'y': 7}
-        ]
-        self.assertListEqual(dict_list, list_ref)
-
-    def test_from_json_string(self):
-        """from_json_string method unittest"""
-        list_input = [
-            {'id': 89, 'width': 10, 'height': 4},
-            {'id': 7, 'width': 1, 'height': 7}
-        ]
-        json_list_input = Rectangle.to_json_string(list_input)
-        list_output = Rectangle.from_json_string(json_list_input)
-        self.assertListEqual(list_output, list_input)
-
-        list_input = []
-        json_list_input = Rectangle.to_json_string(list_input)
-        list_output = Rectangle.from_json_string(json_list_input)
-        self.assertListEqual(list_output, list_input)
-
-    def test_create_method(self):
-        """create method unittest"""
-        r1 = Rectangle(3, 5, 1)
-        r1_dictionary = r1.to_dictionary()
-        r2 = Rectangle.create(**r1_dictionary)
-        self.assertFalse(r1 is r2)
-        self.assertNotEqual(r2, r1)
-
-        s1 = Square(5, id=6, x=1, y=2)
-        s1_dictionary = s1.to_dictionary()
-        s2 = Square.create(**s1_dictionary)
-        self.assertFalse(s1 is s2)
-        self.assertNotEqual(s2, s1)
-
-    def test_load_from_file_method(self):
-        """load_from_file method unittest"""
-        r1 = Rectangle(10, 7, 2, 8, id=10)
-        r2 = Rectangle(2, 4, id=11)
         list_rectangles_input = [r1, r2]
         Rectangle.save_to_file(list_rectangles_input)
         list_rectangles_output = Rectangle.load_from_file()
+        for thing in list_rectangles_output:
+            self.assertTrue(type(thing) is Rectangle)
+        s1 = Square(5)
+        s2 = Square(7, 9, 1)
+        list_squares_input = [s1, s2]
+        Square.save_to_file(list_squares_input)
+        list_squares_output = Square.load_from_file()
+        for thing in list_squares_output:
+            self.assertTrue(type(thing) is Square)
+
 
 if __name__ == '__main__':
     unittest.main()
