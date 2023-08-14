@@ -1,11 +1,9 @@
 #!/usr/bin/node
-let limit = parseInt(process.argv[2]);
-let times = 0;
-
-if (limit === undefined || isNaN(limit)) {
+let args = process.argv[2];
+if (isNaN(Number(args))) {
   console.log('Missing number of occurrences');
 } else {
-  for (times = 0; times < limit; times++) {
+  for (let i = 0; i < Number(args); i++) {
     console.log('C is fun');
   }
 }
