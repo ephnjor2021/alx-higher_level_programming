@@ -1,23 +1,17 @@
 #!/usr/bin/node
-
-class Rectangle {
+// The constructor is used to stablished the object properties or to call the methods to prepare the object for use
+module.exports = class Rectangle {
   constructor (w, h) {
     if (w > 0 && h > 0) {
       this.width = w;
       this.height = h;
     }
   }
-  print () {
-    let rows, columns;
 
-    for (rows = 0; rows < this.height; rows++) {
-      let str = '';
-      for (columns = 0; columns < this.width; columns++) {
-        str += 'X';
-      }
-      console.log(str);
+  // method that prints a rectangle
+  print () {
+    for (let i = 0; i < this.height; i++) {
+      console.log('X'.repeat(this.width));
     }
   }
-}
-
-module.exports = Rectangle;
+};
