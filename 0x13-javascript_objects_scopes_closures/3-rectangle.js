@@ -8,8 +8,14 @@ class Rectangle {
     }
   }
   print () {
-    for (let i = 0; i < this.height; i++) {
-      console.log('X'.repeat(this.width));
+    let rows, columns;
+
+    for (rows = 0; rows < this.height; rows++) {
+      let str = '';
+      for (columns = 0; columns < this.width; columns++) {
+        str += 'X';
+      }
+      console.log(str);
     }
   }
 }
