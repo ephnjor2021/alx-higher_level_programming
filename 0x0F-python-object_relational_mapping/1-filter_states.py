@@ -1,24 +1,28 @@
 #!/usr/bin/python3
-# gets all states via python yee boi with N
+"""Script displays states in database by ascending id order that start with 'N'
+   Script should take 3 arguments:
+   mysql username, mysql password and database name
+"""
 
-
-def main(args):
-    # gets all state stuff by N
-    if len(args) != 4:
-        raise Exception("need 3 arguments!")
-    db = MySQLdb.connect(host='localhost',
-                         user=args[1],
-                         passwd=args[2],
-                         db=args[3])
-    cur = db.cursor()
-    cur.execute(
-        "SELECT * FROM states WHERE name like binary 'N%' ORDER BY id ASC")
-    states = cur.fetchall()
-    for state in states:
-        print(state)
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import sys
     import MySQLdb
-    main(sys.argv)
+
+    if len(sys.argv) > 3:
+        conn = MySQLdb.connect(
+            host="localhost",
+            port=3306,
+            user=sys.argv[1],
+            passwd=sys.argv[2],
+            db=sys.argv[3],
+            charset="utf8"
+        )
+        cur = conn.cursor()
+        cur.execute("""SELECT * FROM states WHERE name LIKE 'N%'
+                    ORDER BY states.id ASC""")
+        query_rows = cur.fetchall()
+        for row in query_rows:
+            if row[1][0] == "N":
+                print(row)
+        cur.close()
+        conn.close()
