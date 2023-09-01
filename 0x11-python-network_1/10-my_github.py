@@ -1,16 +1,17 @@
 #!/usr/bin/python3
-""" script that takes in a string and sends a search request to the
-    Star Wars API
+""" script that takes your Github credentials (username and password) and uses
+    the Github API to display your id
 """
 if __name__ == '__main__':
+    import sys
     import requests
-    from sys import argv
 
-    url = 'https://swapi.co/api/people/'
-    payload = {"search": argv[1]}
-    response = requests.get(url, params=payload).json()
-    count = response["count"]
-    print("Number of results: {}".format(count))
-    if count > 0:
-        for person in response["results"]:
-            print(person["name"])
+    url = 'https://api.github.com/user'
+    payload = {'login': sys.argv[1]}
+    response = requests.get(url, params=payload, auth=(
+        sys.argv[1], sys.argv[2])).json()
+
+    try:
+        print(response['id'])
+    except KeyError:
+        print('None')
